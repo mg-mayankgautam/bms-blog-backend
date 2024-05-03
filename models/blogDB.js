@@ -8,6 +8,8 @@ const dataSchema = new Schema({
     name: {type:String},
     text: {type:String},
     title: {type:String},
+    datestring:{type:String},
+    publishtime:{type:String},
     s3name: {type:String},
 //
 });
