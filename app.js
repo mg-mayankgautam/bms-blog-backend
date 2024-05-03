@@ -3,8 +3,8 @@ require("dotenv").config();
 
 //require { S3Client, PutObjectCommand } from "@aws-sdk/client-s3"
 //const S3Client = require('S3Client')
-const { S3Client,PutObjectCommand  } = require("@aws-sdk/client-s3");
-const multer  = require('multer')
+// const { S3Client,PutObjectCommand  } = require("@aws-sdk/client-s3");
+// const multer  = require('multer')
 const path = require('path');
 const express = require('express');
 const app= express();
@@ -13,29 +13,29 @@ const bodyparser = require('body-parser');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 
-const storage = multer.memoryStorage()
-const upload = multer({ storage: storage })
-const crypto = require('crypto');
+// const storage = multer.memoryStorage()
+// const upload = multer({ storage: storage })
+// const crypto = require('crypto');
 
 
-const bucketName = process.env.AWS_BUCKET_NAME
-const region = process.env.AWS_BUCKET_REGION
-const accessKeyId = process.env.AWS_ACCESS_KEY
-const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY
+// const bucketName = process.env.AWS_BUCKET_NAME
+// const region = process.env.AWS_BUCKET_REGION
+// const accessKeyId = process.env.AWS_ACCESS_KEY
+// const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY
 
 
-const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
-const {  GetObjectCommand } = require("@aws-sdk/client-s3");
+// const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+// const {  GetObjectCommand } = require("@aws-sdk/client-s3");
 
 
 
-const s3Client = new S3Client({
-    region,
-    credentials: {
-      accessKeyId,
-      secretAccessKey
-    }
-  })
+// const s3Client = new S3Client({
+//     region,
+//     credentials: {
+//       accessKeyId,
+//       secretAccessKey
+//     }
+//   })
 
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyparser.json({limit: "50mb"}));
@@ -58,44 +58,8 @@ const mongoose = require('mongoose');
 
 
 
-const generateFileName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex');
+// const generateFileName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex');
 
-
-const blogDB = require("./models/blogDB.js");
-const approvedblogDB = require("./models/approvedblogDB.js");
-
-app.post('/blogdata', upload.single('image'),async(req,res)=>{
-
-    console.log('here',req.body);
-    console.log('here',req.file);
-    // res.send('hello');
-
-    const fileName = generateFileName();
-  
-    const uploadParams = {
-    Bucket: bucketName,
-    Body: req.file.buffer,
-    Key: fileName,
-    ContentType: req.file.mimetype
-  }
-
-  // Send the upload to S3
-  await s3Client.send(new PutObjectCommand(uploadParams));
-
-  const name = req.body.name;
-  const text = req.body.text;
-  const title = req.body.title;
-  const datestring = req.body.datestring
-  const publishtime = req.body.publishtime
-  const s3name = fileName;
-
-
-  let newBlog = new blogDB ({name,text,title,datestring,publishtime,s3name});
-  newBlog.save()
-     
-       .catch(err =>{console.log(err);});
-    
-})
 //blogs-bucket-demo
 
 const session = require('express-session')
@@ -121,90 +85,46 @@ app.use(
 const landingpageRouter = require('./routes/landingpage.js');
 app.use('/', landingpageRouter);
 
-app.get('/getblogs', async(req,res)=>{
-
-    console.log('idhrrrrrrrrrrrrr')
-    try{
-    let blogs = await blogDB.find({});
-    console.log(blogs)
-
-    for(const blog of blogs){
-        console.log('anap',blog)
-      
-        const getObjectParams ={
-
-            Bucket:bucketName,
-            Key:blog.s3name,
-        }
-        const command = new GetObjectCommand(getObjectParams);
-        var url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
-        console.log('inside array',url);
-        var propertyName = "imageurl";
-        blog[propertyName]=url;
-        //blog.text=url;
-    }
-    res.send(blogs);
-}
-catch(e){console.log(e);}
-   // const client = new S3Client(clientParams);
-    
 
 
+// const blogDB = require("./models/blogDB.js");
+// const approvedblogDB = require("./models/approvedblogDB.js");
+// const archivedblogDB = require("./models/archivedblogDB.js");
 
-    
-})
+// app.post('/blogdata', upload.single('image'),async(req,res)=>{
+
+//     console.log('here',req.body);
+//     console.log('here',req.file);
+//     // res.send('hello');
+
+//     const fileName = generateFileName();
+  
+//     const uploadParams = {
+//     Bucket: bucketName,
+//     Body: req.file.buffer,
+//     Key: fileName,
+//     ContentType: req.file.mimetype
+//   }
+
+//   // Send the upload to S3
+//   await s3Client.send(new PutObjectCommand(uploadParams));
+
+//   const name = req.body.name;
+//   const text = req.body.text;
+//   const title = req.body.title;
+//   const datestring = req.body.datestring
+//   const publishtime = req.body.publishtime
+//   const s3name = fileName;
 
 
-app.post('/approveblog',async(req,res)=>{
-   
-    const id=req.body.id;
-    var name        = '';
-    var text        = '';
-    var title       = '';
-    var s3name      = '';
-    var datestring  = ''
-    var publishtime = '';
-
-    try{
-    let blogs = await blogDB.findOneAndDelete({ _id: id })
-
-    var name        = blogs.name;
-    var text        = blogs.text;
-    var title       = blogs.title;
-    var s3name      = blogs.s3name;
-    var datestring  = blogs.datestring
-    var publishtime = blogs.publishtime
-    console.log(blogs,'this is from unaproved blogdb')
-}
-    catch(e){console.log(e)}
-   
-
-    
-
-    let newapprovedBlog = new approvedblogDB ({name,text,title,datestring,publishtime,s3name});
-    newapprovedBlog.save()
-       
-         .catch(err =>{console.log(err);});
-
+//   let newBlog = new blogDB ({name,text,title,datestring,publishtime,s3name});
+//   newBlog.save()
      
-
-    res.redirect('/getapprovedblogs')
-         
-
+//        .catch(err =>{console.log(err);});
     
+// })
 
-
-
-})
-
-
-app.get('/getapprovedblogs', async(req,res)=>{
-
-    let approvedblogs = await approvedblogDB.find({});
-    
-
-    res.send(approvedblogs);
-})
+//
 
 
 
