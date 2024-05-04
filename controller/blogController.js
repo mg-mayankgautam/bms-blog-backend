@@ -217,3 +217,35 @@ module.exports.postBlog= async(req,res)=>{
        .catch(err =>{console.log(err);});
     
 }
+
+
+module.exports.getBlog = async(req,res)=>{
+    const {id} =req.query;
+    console.log(id);
+
+    try{
+        let approvedblog = await approvedblogDB.find({_id:id});
+        
+    
+        for(const blog of approvedblog){
+            // console.log('anap',blog)
+           
+             const getObjectParams ={
+     
+                 Bucket:bucketName,
+                 Key:blog.s3name,
+             }
+             const command = new GetObjectCommand(getObjectParams);
+             var url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+             //console.log('inside array',url);
+             //var propertyName = "imageurl";
+            // blog[propertyName]=url;
+             blog.url=url;
+         }
+    
+        //  console.log(approvedblog)
+        res.send(approvedblog);
+        }
+        catch(e){console.log(e)}
+    
+}

@@ -20,7 +20,7 @@ router.get('/getapprovedblogs', blogController.getApprovedBlogs);
 router.post('/archiveblog', blogController.archiveBlog);
 router.get('/getarchiveblog', blogController.getArchiveBlog);
 
-// router.post('/checkusername',authController.checkUsername);
+router.get('/blog',blogController.getBlog);
 // router.get('/getblogs',blogController.getblogs);
 
 module.exports = router;
