@@ -15,4 +15,4 @@ const dataSchema = new Schema({
 //
 });
 
-module.exports = mongoose.model('allblogs',dataSchema);
+module.exports = mongoose.model('archivedblog',dataSchema);

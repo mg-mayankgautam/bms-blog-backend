@@ -11,6 +11,7 @@ const dataSchema = new Schema({
     datestring:{type:String},
     publishtime:{type:String},
     s3name: {type:String},
+    url: {type:String},
 //
 });
 

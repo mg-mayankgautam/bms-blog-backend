@@ -18,7 +18,7 @@ module.exports.signUp = async (req,res)=>{
 module.exports.logIn = async (req,res)=>{
 
     const {Username,Password}=req.body; 
-    console.log(req.body);
+    //console.log(req.body);
 
     let user = await usersDB.findOne({Username,Password});
    
