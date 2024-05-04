@@ -21,6 +21,7 @@ router.post('/archiveblog', blogController.archiveBlog);
 router.get('/getarchiveblog', blogController.getArchiveBlog);
 
 router.get('/blog',blogController.getBlog);
+ router.post('/deletearchive',blogController.deletearchive);
 // router.get('/getblogs',blogController.getblogs);
 
 module.exports = router;
