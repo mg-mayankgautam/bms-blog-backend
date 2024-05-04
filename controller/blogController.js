@@ -143,6 +143,21 @@ module.exports.archiveBlog =async(req, res)=>{
 
 }
 
+module.exports.deletearchive= async(req,res)=>{
+
+    console.log('yehwali id',req.body)
+
+ var id= req.body.id
+ try{
+    let blogs = await archivedblogDB.findOneAndDelete({ _id: id })
+
+ }
+catch(e){console.log(e)}
+  
+res.redirect('/getarchiveblog');
+    
+}
+
 module.exports.getArchiveBlog =async(req, res) =>{
     
     try{
@@ -217,3 +232,7 @@ module.exports.postBlog= async(req,res)=>{
        .catch(err =>{console.log(err);});
     
 }
+
+
+
+
