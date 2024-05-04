@@ -18,9 +18,9 @@ module.exports.getBlogs =async(req,res)=>{
               const command = new GetObjectCommand(getObjectParams);
               var url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
               //console.log('inside array',url);
-              var propertyName = "imageurl";
-              blog[propertyName]=url;
-              //blog.text=url;
+              //var propertyName = "imageurl";
+             // blog[propertyName]=url;
+              blog.url=url;
           }
           res.send(blogs);
           }
@@ -73,10 +73,32 @@ module.exports.approveBlog =async(req,res)=>{
 }
 
 module.exports.getApprovedBlogs = async(req,res)=>{
+    try{
     let approvedblogs = await approvedblogDB.find({});
     
 
+    for(const blog of approvedblogs){
+        // console.log('anap',blog)
+       
+         const getObjectParams ={
+ 
+             Bucket:bucketName,
+             Key:blog.s3name,
+         }
+         const command = new GetObjectCommand(getObjectParams);
+         var url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+         //console.log('inside array',url);
+         //var propertyName = "imageurl";
+        // blog[propertyName]=url;
+         blog.url=url;
+     }
+
+
     res.send(approvedblogs);
+    }
+    catch(e){console.log(e)}
+
+    
 }
 
 module.exports.archiveBlog =async(req, res)=>{
