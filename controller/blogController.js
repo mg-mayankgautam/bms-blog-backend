@@ -2,6 +2,33 @@ const blogDB = require("../models/blogDB.js");
 const approvedblogDB = require("../models/approvedblogDB.js");
 const archivedblogDB = require("../models/archivedblogDB.js");
 
+module.exports.deleteUnapprovedBlog = async(req,res)=>{
+    const {id} =req.body;
+    //console.log('here',id);
+
+    try{
+        let data = await blogDB.findOneAndDelete({_id:id});
+        
+        let s3name = data.s3name;
+        
+        const params ={
+            Bucket:bucketName,
+            Key:s3name
+        }
+
+        const command=new DeleteObjectCommand(params)
+            try{await s3Client.send(command)}
+            catch(e){
+          console.log(e)}
+        
+        }
+        catch(e){console.log(e)}
+
+        res.redirect('/getblogs');
+       
+    
+}
+
 module.exports.getBlogs =async(req,res)=>{
           try{
           let blogs = await blogDB.find({});
@@ -151,7 +178,22 @@ module.exports.deletearchive= async(req,res)=>{
  try{
     let blogs = await archivedblogDB.findOneAndDelete({ _id: id })
 
- }
+    let s3name = blogs.s3name;
+        
+        const params ={
+            Bucket:bucketName,
+            Key:s3name
+        }
+
+        const command=new DeleteObjectCommand(params)
+            try{await s3Client.send(command)}
+            catch(e){
+          console.log(e)}
+        
+        
+       
+    }
+ 
 catch(e){console.log(e)}
   
 res.redirect('/getarchiveblog');
@@ -168,6 +210,46 @@ module.exports.getArchiveBlog =async(req, res) =>{
     
         catch(e){console.log(e)}
 }
+
+module.exports.unarchiveblog =async(req, res) =>{
+    
+    console.log(req.body)
+
+    const id=req.body.id;
+    var name        = '';
+    var text        = '';
+    var title       = '';
+    var s3name      = '';
+    var datestring  = ''
+    var publishtime = '';
+    var url =''
+
+     try{
+     let blogs = await archivedblogDB.findOneAndDelete({ _id: id })
+     
+    var name        = blogs.name;
+    var text        = blogs.text;
+    var title       = blogs.title;
+    var s3name      = blogs.s3name;
+    var datestring  = blogs.datestring
+    var publishtime = blogs.publishtime
+    var url= blogs.url
+    //     console.log(blogs,'this is from unaproved blogdb')
+    }
+    catch(e){console.log(e)}
+   
+
+    
+
+     let newapprovededblog = new approvedblogDB ({name,text,title,datestring,publishtime,s3name, url});
+     newapprovededblog.save()
+       
+        .catch(err =>{console.log(err);});
+
+     
+    res.redirect('/getarchiveblog')
+}
+
 
 
 
@@ -186,7 +268,7 @@ const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY
 
 
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
-const {  GetObjectCommand } = require("@aws-sdk/client-s3");
+const {  GetObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
 
 const generateFileName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex');
 
@@ -264,3 +346,6 @@ module.exports.getBlog = async(req,res)=>{
         catch(e){console.log(e)}
     
 }
+
+
+
